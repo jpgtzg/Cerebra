@@ -2,6 +2,7 @@
 # 02/01/2025
 
 from dataclasses import dataclass
+import time
 from typing import Callable
 
 @dataclass
@@ -43,6 +44,15 @@ class LLM:
         :param prompt: The prompt to send to the model.
         :return: An LLMResponse containing the model's response.
         """
-        return self.executor(prompt) if self.executor else None
+        start_time = time.time()
+        response = self.executor(prompt)
+        end_time = time.time()
+        execution_time = end_time - start_time
+
+        if self.conditions["status"] == "success":
+            return LLMResponse(response=response, llm_name=self.model, status="success", execution_time=execution_time)
+        else:
+            return LLMResponse(response=response, llm_name=self.model, status="failed", execution_time=execution_time)
+
 
 
