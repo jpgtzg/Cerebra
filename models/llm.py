@@ -12,17 +12,34 @@ class LLMResponse:
     status: dict
     execution_time: float
 
+@dataclass
+class LLMConditions:
+    domain: str
+    language: str
+    sentiment: str
+    topic: str
+
+class LLMCallable(Callable):
+    def __init__(self, model: str, api_key: str, conditions: LLMConditions, executor: Callable):
+        self.model = model
+        self.api_key = api_key
+        self.conditions = conditions
+        self.executor = executor
+
+    def __call__(self, prompt: str) -> LLMResponse:
+        return self.executor(prompt)
+
 class LLM:
 
     model: str
     api_key: str
-    conditions: dict
-    executor: Callable
+    conditions: LLMConditions
+    executor: LLMCallable
     """
     A class to represent a Language Model (LLM).
     """
 
-    def __init__(self, model: str, api_key: str, conditions: dict, executor: Callable):
+    def __init__(self, model: str, api_key: str, conditions: LLMConditions, executor: LLMCallable):
         """
         Initializes the LLM with the given parameters.
 
@@ -49,7 +66,7 @@ class LLM:
         end_time = time.time()
         execution_time = end_time - start_time
 
-        if self.conditions["status"] == "success":
+        if response.status == "success":
             return LLMResponse(response=response, llm_name=self.model, status="success", execution_time=execution_time)
         else:
             return LLMResponse(response=response, llm_name=self.model, status="failed", execution_time=execution_time)
