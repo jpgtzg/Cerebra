@@ -1,6 +1,7 @@
 # Written by Juan Pablo Gutiérrez
 # 03/01/2025
 
+import algorithms
 from models.llm import LLM, LLMResponse
 
 class Orchestrator:
@@ -14,5 +15,5 @@ class Orchestrator:
         self.llms = llms
 
     def execute(self, prompt: str) -> LLMResponse:
-        llm = algorithms.balance_prompting(prompt, self.llms)
+        llm = algorithms.get_best_model(prompt, self.llms)
         return llm.execute(prompt)
