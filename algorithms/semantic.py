@@ -19,6 +19,7 @@ def get_semantic_based_model(model: SentenceTransformer, prompt: str, llms: dict
     """
     similarities = {model_name: similarity_score(model, prompt, llms[model_name]) for model_name in llms.keys()}
     best_match = max(similarities, key=similarities.get)
+
     return {
         "best_match": best_match,
         "similarity": similarities[best_match]

@@ -16,3 +16,26 @@ def get_sentiment_analysis(prompt: str) -> str:
     """
     sia = SentimentIntensityAnalyzer()
     return sia.polarity_scores(prompt)
+
+def get_sentiment_based_model(prompt: str, llms: dict) -> str:
+    """
+    Gets the best sentiment based model for the given prompt.
+
+    Args:
+        prompt (str): The prompt to analyze.
+        llms (dict): The LLM models to decide on.
+
+    Returns:
+        str: The best sentiment based model for the given prompt.
+    """
+    return llms[get_sentiment_analysis(prompt)]
+
+llms = {
+    "positive": "gpt-4o",
+    "negative": "gpt-4o",
+    "neutral": "gpt-4o"
+}
+
+prompt = "I love programming"
+res = get_sentiment_analysis(prompt)
+print(res)
