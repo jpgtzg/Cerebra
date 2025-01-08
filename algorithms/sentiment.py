@@ -3,9 +3,10 @@
 # This file handles sentiment analysis of a prompt.
 
 from nltk.sentiment import SentimentIntensityAnalyzer
-from typing import Literal, Dict, Optional
+import text2emotion as te
+from typing import Dict
 
-def get_sentiment_analysis(prompt: str) -> dict:
+def _get_sentiment_analysis(prompt: str) -> Dict[str, float]:
     """
     Gets the sentiment analysis of the given prompt.
 
@@ -18,99 +19,151 @@ def get_sentiment_analysis(prompt: str) -> dict:
     sia = SentimentIntensityAnalyzer()
     return sia.polarity_scores(prompt)
 
-def get_sentiment_based_model(
-    prompt: str,
-    llms: Dict,
-    method: Literal["dominant", "weighted"] = "dominant",
-    weights: Optional[Dict] = None
-) -> dict:
+def _get_emotion_analysis(prompt: str) -> Dict[str, float]:
     """
-    Gets the best sentiment-based model for the given prompt.
+    Gets the emotion analysis of the given prompt.
 
     Args:
         prompt (str): The prompt to analyze.
-        llms (dict): The LLM models to decide on.
-        method (Literal["dominant", "weighted"]): The method to use to decide on the model.
-        weights (dict): The weights to use for the weighted method.
+
     Returns:
-        dict: The best sentiment-based model and its score for the given prompt.
+        dict: The emotion scores of the prompt.
     """
-    sentiment = get_sentiment_analysis(prompt)
+    return te.get_emotion(prompt)
 
-    if method == "dominant":
-        return get_dominant_sentiment_model(sentiment, llms)
-    elif method == "weighted":
-        if weights is None:
-            raise ValueError("Weights parameter is required for the weighted method.")
-        return get_weighted_sentiment_model(prompt, llms, weights)
-    else:
-        raise ValueError(f"Invalid method: {method}")
-    
-def get_dominant_sentiment_model(sentiment: dict, llms: dict) -> str:
+def _normalize_scores(scores: Dict[str, float]) -> Dict[str, float]:
     """
-    Gets the dominant sentiment model from the sentiment analysis.
+    Normalizes a dictionary of scores to sum to 1.
+
+    Args:
+        scores (dict): Scores to normalize.
+
+    Returns:
+        dict: Normalized scores.
     """
+    total = sum(scores.values())
+    return {key: value / total if total > 0 else 0 for key, value in scores.items()}
 
-    for llm in llms:
-        llm_sentiment = get_sentiment_analysis(llm)
-        if llm_sentiment["compound"] > sentiment["compound"]:
-            sentiment = llm_sentiment
+def _analyze_prompt(prompt: str) -> Dict[str, Dict[str, float]]:
+    """
+    Analyzes the prompt for sentiment and emotion.
 
-    dominant_sentiment = max(sentiment, key=lambda x: sentiment[x] if x != "compound" else -1)
+    Args:
+        prompt (str): The prompt to analyze.
 
-    selected_model = llms.get(dominant_sentiment, "gpt-3.5")  # Default to gpt-3.5 if no match
+    Returns:
+        dict: Combined sentiment and emotion analysis results.
+    """
+    sentiment = _get_sentiment_analysis(prompt)
+    emotion = _get_emotion_analysis(prompt)
 
     return {
-        "llm": selected_model,
-        "score": sentiment[dominant_sentiment]
+        "sentiment": sentiment,
+        "emotion": emotion
     }
 
-def get_weighted_sentiment_model(prompt: str, llms: dict, weights: dict) -> dict:
+def select_best_llm(
+    prompt: str,
+    llms: list[LLM],
+    sentiment_weights: Dict[str, float],
+    emotion_weights: Dict[str, float]
+) -> LLM:
     """
-    Selects the best model based on weighted sentiment scores.
+    Selects the best LLM based on sentiment and emotion analysis.
 
     Args:
         prompt (str): The prompt to analyze.
-        llms (dict): The LLM models to decide on.
-        weights (dict): Weights for positive, negative, and neutral sentiments.
+        llms (list): List of LLMs with their descriptions.
+        sentiment_weights (dict): Weights for sentiment analysis.
+        emotion_weights (dict): Weights for emotion analysis.
 
     Returns:
-        dict: The best model and its weighted score.
+        dict: The selected LLM and its score.
     """
-    sentiment = get_sentiment_analysis(prompt)
 
-    # Calculate weighted score for each model
-    weighted_scores = {}
-    for model, description in llms.items():
-        weighted_score = sum(sentiment[sentiment_key] * weights[sentiment_key] for sentiment_key in weights.keys())
-        weighted_scores[model] = weighted_score
+    prompt_analysis = _analyze_prompt(prompt)
+    prompt_sentiment = _normalize_scores(prompt_analysis["sentiment"])
+    prompt_emotion = _normalize_scores(prompt_analysis["emotion"])
 
-    # Select the model with the highest weighted score
-    best_model = max(weighted_scores, key=weighted_scores.get)
+    llm_analysis = {llm.model: _analyze_prompt(llm.conditions.to_description()) for llm in llms}
+    llm_sentiment = {
+        model: _normalize_scores(analysis["sentiment"])
+        for model, analysis in llm_analysis.items()
+    }
+    llm_emotion = {
+        model: _normalize_scores(analysis["emotion"])
+        for model, analysis in llm_analysis.items()
+    }
+
+    # Compare with prompt and calculate weighted scores
+    scores = {}
+    for llm in llms:
+        model = llm.model
+
+        # Calculate sentiment similarity
+        sentiment_similarity = sum(
+            prompt_sentiment[sentiment] * llm_sentiment[model].get(sentiment, 0) * sentiment_weights.get(sentiment, 1)
+            for sentiment in prompt_sentiment
+        )
+
+        # Calculate emotion similarity
+        emotion_similarity = sum(
+            prompt_emotion[emotion] * llm_emotion[model].get(emotion, 0) * emotion_weights.get(emotion, 1)
+            for emotion in prompt_emotion
+        )
+
+        # Final score for the LLM
+        scores[llm] = sentiment_similarity + emotion_similarity
+
+    # Select the best model
+    best_model, best_score = max(scores.items(), key=lambda x: x[1])
 
     return {
         "llm": best_model,
-        "weighted_score": weighted_scores[best_model]
+        "score": best_score
     }
 
-# Define LLMs
-llms = {
-    "gpt-4": "Optimized for reasoning, creativity, and complex tasks.",
-    "gpt-4o": "Moderately optimized for balanced tasks and cost-efficiency.",
-    "gpt-3.5": "Suitable for simple, straightforward tasks."
-}
+def _analyze_prompt(prompt: str) -> dict:
+    """
+    Analyzes the prompt for sentiment and emotion.
 
-# Define weights for sentiment categories
-weights = {
-    "pos": 0.5,  # Positive sentiment is given higher weight
-    "neg": 0.3,  # Negative sentiment has medium weight
-    "neu": 0.2   # Neutral sentiment has lower weight
-}
+    Args:
+        prompt (str): The prompt to analyze.
 
-# Example prompt
-prompt = "I love programming, but it can sometimes be frustrating."
+    Returns:
+        dict: Combined sentiment and emotion analysis results.
+    """
+    # Example implementation using existing methods
+    sentiment = _get_sentiment_analysis(prompt)
+    emotion = _get_emotion_analysis(prompt)
+    return {"sentiment": sentiment, "emotion": emotion}
 
-# Get the best model based on weighted sentiment scores
-result = get_weighted_sentiment_model(prompt, llms, weights)
-print(f"The best model is {result['llm']} with a weighted score of {result['weighted_score']:.4f}")
+def _normalize_scores(scores: dict) -> dict:
+    """
+    Normalizes the scores to sum up to 1 for comparison.
 
+    Args:
+        scores (dict): Scores to normalize.
+
+    Returns:
+        dict: Normalized scores.
+    """
+    total = sum(scores.values())
+    return {key: value / total if total > 0 else 0 for key, value in scores.items()}
+
+llms = [
+    LLM("gpt-4", LLMConditions(domain="creativity", sentiment="positive", topic="arts", description="Optimized for reasoning, creativity, and complex tasks.")),
+    LLM("gpt-4o", LLMConditions(domain="general", sentiment="positive", topic="general", description="Moderately optimized for balanced tasks and cost-efficiency.")),
+    LLM("gpt-3.5", LLMConditions(domain="general", sentiment="positive", topic="general", description="Suitable for simple, straightforward tasks.")),
+]
+
+# Weights for sentiment and emotion
+sentiment_weights = {"positive": 1.0, "neutral": 0.5, "negative": 1.5}
+emotion_weights = {"Happy": 1.0, "Sad": 1.2, "Angry": 1.5, "Fear": 1.3, "Surprise": 1.0}
+
+# Example usage
+prompt = "What's a book"
+result = select_best_llm(prompt, llms, sentiment_weights, emotion_weights)
+
+print(f"Selected LLM: {result['llm'].model}")
+print(f"Score: {result['score']}")
