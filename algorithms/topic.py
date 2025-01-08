@@ -12,7 +12,7 @@ from algorithms.utils import similarity_score
 
 vectorizer = CountVectorizer()
 
-def get_topic_based_model(model: SentenceTransformer, prompt: str, llms: dict) -> str:
+def get_topic_based_model(model: SentenceTransformer, prompt: str, llms: dict) -> dict:
     """
     Gets the best topic based model for the given prompt.
 
@@ -48,8 +48,8 @@ def get_topic_based_model(model: SentenceTransformer, prompt: str, llms: dict) -
     result = topic_based_models[best_topic]
 
     return {
-        "best_match": result['llm'],
-        "similarity": result['similarity']
+        "llm": result['llm'],
+        "score": result['similarity']
     }
 
 def generate_topic_description(topic_distribution, top_n_words=10):

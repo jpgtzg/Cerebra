@@ -71,5 +71,9 @@ class LLM:
         else:
             return LLMResponse(response=response, llm_name=self.model, status="failed", execution_time=execution_time)
 
-
+    def to_dict(self):
+        return {
+            "model": self.model,
+            "conditions": self.conditions,
+        }
 

@@ -19,3 +19,4 @@ def similarity_score(model: SentenceTransformer, desc1: str, desc2: str) -> floa
     embedding1 = model.encode(desc1)
     embedding2 = model.encode(desc2)
     return util.pytorch_cos_sim(embedding1, embedding2).item()
+
