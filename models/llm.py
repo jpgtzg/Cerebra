@@ -15,9 +15,12 @@ class LLMResponse:
 @dataclass
 class LLMConditions:
     domain: str
-    language: str
     sentiment: str
     topic: str
+    description: str
+
+    def to_description(self):
+        return f"Domain: {self.domain}, Sentiment: {self.sentiment}, Topic: {self.topic}, Description: {self.description}"
 
 class LLMCallable(Callable):
     def __init__(self, model: str, api_key: str, conditions: LLMConditions, executor: Callable):
