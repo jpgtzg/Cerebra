@@ -69,10 +69,7 @@ class LLM:
         end_time = time.time()
         execution_time = end_time - start_time
 
-        if response.status == "success":
-            return LLMResponse(response=response, llm_name=self.model, status="success", execution_time=execution_time)
-        else:
-            return LLMResponse(response=response, llm_name=self.model, status="failed", execution_time=execution_time)
+        return LLMResponse(response=response, llm_name=self.model, status="success", execution_time=execution_time)
 
     def to_dict(self):
         return {
