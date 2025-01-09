@@ -3,8 +3,8 @@
 # This file handles semantic similarity between a prompt and a LLM model.
 
 from sentence_transformers import SentenceTransformer
-from src.algorithms.utils import similarity_score
-from src.models.llm import LLM
+from cerebra.algorithms.utils import similarity_score
+from cerebra.models.llm import LLM
 
 def get_semantic_based_model(model: SentenceTransformer, prompt: str, llms: list[LLM]) -> str:
     """

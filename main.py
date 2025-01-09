@@ -8,15 +8,15 @@ from typing import Callable
 
 from sentence_transformers import SentenceTransformer
 
-from src.algorithms.analysis import get_best_model
-from src.models.llm import LLM, LLMConditions
-from src.models.orchestrator import Orchestrator
+from cerebra.algorithms.analysis import get_best_model
+from cerebra.models.llm import LLM, LLMConditions
+from cerebra.models.orchestrator import Orchestrator
 
 from openai import OpenAI
 
 def openai_executor(prompt: str) -> str:
 
-    client = OpenAI(api_key="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")
+    client = OpenAI(api_key="")
 
     response = client.chat.completions.create(
         model="gpt-4o",

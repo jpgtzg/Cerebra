@@ -4,10 +4,10 @@
 
 from typing import Dict
 from sentence_transformers import SentenceTransformer
-from src.algorithms.semantic import get_semantic_based_model
-from src.algorithms.sentiment import get_sentiment_emotion_model
-from src.algorithms.topic import get_topic_based_model
-from src.models.llm import LLM
+from cerebra.algorithms.semantic import get_semantic_based_model
+from cerebra.algorithms.sentiment import get_sentiment_emotion_model
+from cerebra.algorithms.topic import get_topic_based_model
+from cerebra.models.llm import LLM
 
 def get_best_model(
     model: SentenceTransformer,
