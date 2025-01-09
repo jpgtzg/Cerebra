@@ -2,8 +2,8 @@
 # 03/01/2025
 
 from sentence_transformers import SentenceTransformer
-from cerebra.algorithms.analysis import get_best_model
-from cerebra.models.llm import LLM, LLMResponse
+from cerebraai.algorithms.analysis import get_best_model
+from cerebraai.models.llm import LLM, LLMResponse
 
 class Orchestrator:
 
