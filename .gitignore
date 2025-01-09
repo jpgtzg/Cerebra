@@ -1,1 +1,13 @@
 .venv/
+build/
+dist/
+*.egg-info/
+*.pyc
+*.pyo
+*.pyd
+*.pyz
+*.pyw
+*.pyx
+*.pyj
+*.pyb
+*.pyo

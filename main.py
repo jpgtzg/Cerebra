@@ -8,9 +8,9 @@ from typing import Callable
 
 from sentence_transformers import SentenceTransformer
 
-from cerebra.algorithms.analysis import get_best_model
-from cerebra.models.llm import LLM, LLMConditions
-from cerebra.models.orchestrator import Orchestrator
+from cerebraai.algorithms.analysis import get_best_model
+from cerebraai.models.llm import LLM, LLMConditions
+from cerebraai.models.orchestrator import Orchestrator
 
 from openai import OpenAI
 
