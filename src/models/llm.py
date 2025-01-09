@@ -22,38 +22,26 @@ class LLMConditions:
     def to_description(self):
         return f"Domain: {self.domain}, Sentiment: {self.sentiment}, Topic: {self.topic}, Description: {self.description}"
 
-class LLMCallable(Callable):
-    def __init__(self, model: str, api_key: str, conditions: LLMConditions, executor: Callable):
-        self.model = model
-        self.api_key = api_key
-        self.conditions = conditions
-        self.executor = executor
-
-    def __call__(self, prompt: str) -> LLMResponse:
-        return self.executor(prompt)
 
 class LLM:
 
     model: str
-    api_key: str
     conditions: LLMConditions
-    executor: LLMCallable
+    executor: Callable
     """
     A class to represent a Language Model (LLM).
     """
 
-    def __init__(self, model: str, api_key: str, conditions: LLMConditions, executor: LLMCallable):
+    def __init__(self, model: str, conditions: LLMConditions, executor: Callable):
         """
         Initializes the LLM with the given parameters.
 
         :param name: The name of the LLM.
         :param model: The model identifier.
-        :param api_key: The API key for accessing the model.
         :param conditions: A dictionary of conditions for the model to be ran.
         :param executor: A callable to execute the model with a prompt.
         """
         self.model = model
-        self.api_key = api_key
         self.conditions = conditions
         self.executor = executor
 
@@ -65,7 +53,10 @@ class LLM:
         :return: An LLMResponse containing the model's response.
         """
         start_time = time.time()
-        response = self.executor(prompt)
+        try:
+            response = self.executor(prompt)
+        except Exception as e:
+            return LLMResponse(response=f"Error while executing the model: {e}", llm_name=self.model, status="error", execution_time=0.0)
         end_time = time.time()
         execution_time = end_time - start_time
 
