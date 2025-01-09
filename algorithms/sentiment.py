@@ -5,6 +5,7 @@
 from nltk.sentiment import SentimentIntensityAnalyzer
 import text2emotion as te
 from typing import Dict
+from models.llm import LLM
 
 def _get_sentiment_analysis(prompt: str) -> Dict[str, float]:
     """
@@ -62,7 +63,7 @@ def _analyze_prompt(prompt: str) -> Dict[str, Dict[str, float]]:
         "emotion": emotion
     }
 
-def select_best_llm(
+def get_sentiment_emotion_model(
     prompt: str,
     llms: list[LLM],
     sentiment_weights: Dict[str, float],
@@ -150,20 +151,3 @@ def _normalize_scores(scores: dict) -> dict:
     """
     total = sum(scores.values())
     return {key: value / total if total > 0 else 0 for key, value in scores.items()}
-
-llms = [
-    LLM("gpt-4", LLMConditions(domain="creativity", sentiment="positive", topic="arts", description="Optimized for reasoning, creativity, and complex tasks.")),
-    LLM("gpt-4o", LLMConditions(domain="general", sentiment="positive", topic="general", description="Moderately optimized for balanced tasks and cost-efficiency.")),
-    LLM("gpt-3.5", LLMConditions(domain="general", sentiment="positive", topic="general", description="Suitable for simple, straightforward tasks.")),
-]
-
-# Weights for sentiment and emotion
-sentiment_weights = {"positive": 1.0, "neutral": 0.5, "negative": 1.5}
-emotion_weights = {"Happy": 1.0, "Sad": 1.2, "Angry": 1.5, "Fear": 1.3, "Surprise": 1.0}
-
-# Example usage
-prompt = "What's a book"
-result = select_best_llm(prompt, llms, sentiment_weights, emotion_weights)
-
-print(f"Selected LLM: {result['llm'].model}")
-print(f"Score: {result['score']}")

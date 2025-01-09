@@ -4,8 +4,9 @@
 
 from sentence_transformers import SentenceTransformer
 from algorithms.utils import similarity_score
+from models.llm import LLM
 
-def get_semantic_based_model(model: SentenceTransformer, prompt: str, llms: dict) -> str:
+def get_semantic_based_model(model: SentenceTransformer, prompt: str, llms: list[LLM]) -> str:
     """
     Gets the best semantic based model for the given prompt.
 
@@ -15,12 +16,13 @@ def get_semantic_based_model(model: SentenceTransformer, prompt: str, llms: dict
         llms (dict): The LLM models to decide on.
 
     Returns:
-        str: The best semantic based model.
+        dict: The best semantic based model.
     """
-    similarities = {model_name: similarity_score(model, prompt, llms[model_name]) for model_name in llms.keys()}
+    similarities = {llm: similarity_score(model, prompt, llm.conditions.to_description()) for llm in llms}
     best_match = max(similarities, key=similarities.get)
+    best_score = similarities[best_match]
 
     return {
         "llm": best_match,
-        "score": similarities[best_match]
+        "score": best_score
     }
