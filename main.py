@@ -8,9 +8,9 @@ from typing import Callable
 
 from sentence_transformers import SentenceTransformer
 
-from algorithms.analysis import get_best_model
-from models.llm import LLM, LLMConditions
-from models.orchestrator import Orchestrator
+from src.algorithms.analysis import get_best_model
+from src.models.llm import LLM, LLMConditions
+from src.models.orchestrator import Orchestrator
 
 callable = lambda prompt: "Hello"
 

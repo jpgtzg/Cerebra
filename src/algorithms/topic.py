@@ -5,8 +5,8 @@
 from sentence_transformers import SentenceTransformer, util
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
-from algorithms.utils import similarity_score
-from models.llm import LLM
+from src.algorithms.utils import similarity_score
+from src.models.llm import LLM
 
 import nltk
 import numpy as np

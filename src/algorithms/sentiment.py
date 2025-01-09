@@ -5,7 +5,7 @@
 from nltk.sentiment import SentimentIntensityAnalyzer
 import text2emotion as te
 from typing import Dict
-from models.llm import LLM
+from src.models.llm import LLM
 
 def _get_sentiment_analysis(prompt: str) -> Dict[str, float]:
     """

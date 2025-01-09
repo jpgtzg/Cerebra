@@ -2,8 +2,8 @@
 # 03/01/2025
 
 from sentence_transformers import SentenceTransformer
-from algorithms.analysis import get_best_model
-from models.llm import LLM, LLMResponse
+from src.algorithms.analysis import get_best_model
+from src.models.llm import LLM, LLMResponse
 
 class Orchestrator:
 
