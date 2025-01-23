@@ -19,3 +19,6 @@ class Orchestrator:
     def execute(self, prompt: str) -> LLMResponse:
         llm = get_best_model(self.text_model, prompt, self.llms)["llm"]
         return llm.execute(prompt)
+
+    def add_llm(self, llm: LLM):
+        self.llms.append(llm)
