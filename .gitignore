@@ -11,3 +11,4 @@ dist/
 *.pyj
 *.pyb
 *.pyo
+.DS_Store
