@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import codecs
 import os
 
-VERSION = '0.1.9'
+VERSION = '0.2.2'
 DESCRIPTION = 'Cerebra is an AI Orchestrator for LLM models.'
 
 # Setting up
