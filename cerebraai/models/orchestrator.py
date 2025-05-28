@@ -23,13 +23,14 @@ class Orchestrator:
         self.sentiment_weights = sentiment_weights
         self.emotion_weights = emotion_weights
 
-    def execute(self, prompt: str, analysis_weights: dict = None, sentiment_weights: dict = None, emotion_weights: dict = None) -> LLMResponse:
-        analysis_weights = analysis_weights if analysis_weights is not None else self.analysis_weights
-        sentiment_weights = sentiment_weights if sentiment_weights is not None else self.sentiment_weights
-        emotion_weights = emotion_weights if emotion_weights is not None else self.emotion_weights
-        
-        llm = get_best_model(self.text_model, prompt, self.llms, analysis_weights, sentiment_weights, emotion_weights)["llm"]
+    def execute(self, prompt: str) -> LLMResponse:
+        llm = get_best_model(self.text_model, prompt, self.llms, self.analysis_weights, self.sentiment_weights, self.emotion_weights)["llm"]
         return llm.execute(prompt)
+
+    def update_weights(self, analysis_weights: dict = None, sentiment_weights: dict = None, emotion_weights: dict = None):
+        self.analysis_weights = analysis_weights
+        self.sentiment_weights = sentiment_weights
+        self.emotion_weights = emotion_weights
 
     def add_llm(self, llm: LLM):
         self.llms.append(llm)
