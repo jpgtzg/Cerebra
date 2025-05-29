@@ -3,7 +3,8 @@
 
 from sentence_transformers import SentenceTransformer
 from cerebraai.algorithms.analysis import get_best_model
-from cerebraai.models.llm import LLM, LLMResponse
+from cerebraai.models.llm import LLM, LLMResponse, LLMConditions
+from typing import Callable
 
 class Orchestrator:
 
@@ -31,6 +32,17 @@ class Orchestrator:
         self.analysis_weights = analysis_weights
         self.sentiment_weights = sentiment_weights
         self.emotion_weights = emotion_weights
+
+    def update_llms(self, llms: list[dict], execute : {str: Callable}):
+        new_llms = []
+        for llm in llms:
+            new_llms.append(LLM(
+                model=llm["model"],
+                conditions=LLMConditions(domain=llm["conditions"]["domain"], sentiment=llm["conditions"]["sentiment"], topic=llm["conditions"]["topic"], description=llm["conditions"]["description"]),
+                executor=execute[llm["model"]]
+            ))
+
+        self.llms = new_llms
 
     def add_llm(self, llm: LLM):
         self.llms.append(llm)
