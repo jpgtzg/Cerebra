@@ -36,19 +36,3 @@ response = orchestrator.execute(prompt="What is the capital of France?")
 # The agent will return a response and a status containing information about which LLM was used and the time it took to generate the response.
 print(response)
 ```
-
-
-[project]
-name = "ai-orchestrator"
-version = "0.1.0"
-description = "An AI orchestrator for LLMs"
-authors = [
-    { name="Juan Pablo Gutiérrez", email="juanpgtzg@gmail.com" }
-]
-dependencies = [
-    "sentence-transformers"
-]
-requires-python = ">=3.10"
-
-[project.urls]
-Home = "https://github.com/juanpgtzg/cerebra"
